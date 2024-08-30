@@ -42,19 +42,17 @@ router.post('/courses/:courseId', userMiddleware, async (req, res) => {
 
 router.get('/PurchasedCourses', userMiddleware, async(req, res) => {
     // Implement fetching purchased courses logic
-    const user = await User.findOne({
-        Username : req.headers.Username
-    });
-    console.log(user.PurchasedCourses);
-    const courses = await Course.find({
-        _id: {
-            "$in": user.PurchasedCourses
-        }
+    let {Username}=req.body;
+    const user = await User.findOne({Username});
+    const purchasedCourses = [...new Set(user.PurchasedCourse)]; // De-duplicate ObjectId
+
+    const coursesList = await Course.find({
+        _id: { "$in": purchasedCourses }
     });
 
     res.json({
-        courses: courses
-    })
+        courses: coursesList
+    });
 });
 
 module.exports = router
